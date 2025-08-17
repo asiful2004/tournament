@@ -7,7 +7,7 @@ This is a full-stack web application for hosting Free Fire gaming tournaments wi
 ## User Preferences
 
 - **Communication style**: Simple, everyday language
-- **Admin credentials**: asiful2004@yahoo.com / password: 1234 (must remain unchanged)
+- **Admin credentials**: asiful2004@yahoo.com / password: 1234 (promoted to admin - must remain unchanged)
 - **Navigation**: Must be visible on all pages including login/register
 - **Age requirement**: 15+ years must be displayed on registration, tournament join, and terms pages
 - **Refund policy**: "No Refunds" policy should only appear in Terms & Conditions, not elsewhere
