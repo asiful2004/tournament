@@ -170,3 +170,68 @@ export type Participant = typeof participants.$inferSelect;
 export type InsertParticipant = z.infer<typeof insertParticipantSchema>;
 export type WebsiteOrder = typeof websiteOrders.$inferSelect;
 export type InsertWebsiteOrder = z.infer<typeof insertWebsiteOrderSchema>;
+
+// Email logs for tracking email delivery status
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  recipientEmail: text("recipient_email").notNull(),
+  subject: text("subject").notNull(),
+  template: text("template"), // email template name
+  status: text("status").notNull().default("pending"), // 'pending', 'sent', 'failed', 'delivered'
+  error: text("error"), // error message if failed
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  tournamentId: text("tournament_id").references(() => tournaments.id),
+  userId: text("user_id").references(() => users.id),
+});
+
+// Site analytics for visitor tracking
+export const siteAnalytics = pgTable("site_analytics", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  uniqueVisitors: integer("unique_visitors").default(0),
+  totalPageViews: integer("total_page_views").default(0),
+  newRegistrations: integer("new_registrations").default(0),
+  tournamentJoins: integer("tournament_joins").default(0),
+  totalRevenue: integer("total_revenue").default(0), // in cents
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Active sessions for real-time user counting
+export const activeSessions = pgTable("active_sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: text("user_id").references(() => users.id),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  lastActivity: timestamp("last_activity").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Admin notifications for real-time alerts
+export const adminNotifications = pgTable("admin_notifications", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(), // 'new_participant', 'new_payment', 'tournament_full', etc.
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  relatedId: text("related_id"), // tournament_id, user_id, etc.
+  relatedType: text("related_type"), // 'tournament', 'user', 'payment', etc.
+});
+
+// Additional insert schemas and types
+export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({ id: true, createdAt: true });
+export const insertSiteAnalyticsSchema = createInsertSchema(siteAnalytics).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertActiveSessionSchema = createInsertSchema(activeSessions).omit({ createdAt: true });
+export const insertAdminNotificationSchema = createInsertSchema(adminNotifications).omit({ id: true, createdAt: true });
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type SiteAnalytics = typeof siteAnalytics.$inferSelect;
+export type ActiveSession = typeof activeSessions.$inferSelect;
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
+export type InsertSiteAnalytics = z.infer<typeof insertSiteAnalyticsSchema>;
+export type InsertActiveSession = z.infer<typeof insertActiveSessionSchema>;
+export type InsertAdminNotification = z.infer<typeof insertAdminNotificationSchema>;

@@ -127,6 +127,48 @@ class EmailService {
       html,
     });
   }
+
+  async sendTestEmail(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const testSubject = "SMTP Test Email - Skills Money";
+      const testHtml = `
+        <div style="background: #0F0F23; color: #ffffff; padding: 20px; font-family: Inter, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background: #1A1A2E; border-radius: 12px; padding: 30px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #7C3AED; font-size: 28px; margin-bottom: 10px;">✅ SMTP Test Successful</h1>
+              <p style="color: #E5E7EB; font-size: 16px;">Your email configuration is working correctly!</p>
+            </div>
+            
+            <div style="background: #16213E; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+              <h3 style="color: #A855F7; margin-top: 0;">Test Details</h3>
+              <p style="color: #E5E7EB;">Test sent at: ${new Date().toLocaleString()}</p>
+              <p style="color: #E5E7EB;">Recipient: ${email}</p>
+              <p style="color: #E5E7EB;">From: Skills Money Platform</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+              <p style="color: #9CA3AF; font-size: 14px;">This is an automated test email from Skills Money admin panel.</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      await this.transporter.sendMail({
+        from: process.env.FROM_EMAIL || 'noreply@skillsmoney.com',
+        to: email,
+        subject: testSubject,
+        html: testHtml,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("SMTP Test failed:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Unknown error occurred" 
+      };
+    }
+  }
 }
 
 export const emailService = new EmailService();

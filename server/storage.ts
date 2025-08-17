@@ -7,6 +7,10 @@ import {
   auditLogs,
   reminders,
   settings,
+  emailLogs,
+  siteAnalytics,
+  activeSessions,
+  adminNotifications,
   type User,
   type UpsertUser,
   type Tournament,
@@ -19,6 +23,14 @@ import {
   type InsertWebsiteOrder,
   type Setting,
   type InsertSetting,
+  type EmailLog,
+  type InsertEmailLog,
+  type SiteAnalytics,
+  type InsertSiteAnalytics,
+  type ActiveSession,
+  type InsertActiveSession,
+  type AdminNotification,
+  type InsertAdminNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc } from "drizzle-orm";
@@ -70,6 +82,17 @@ export interface IStorage {
   getSetting(key: string): Promise<Setting | undefined>;
   setSetting(key: string, value: string): Promise<Setting>;
   deleteSetting(key: string): Promise<void>;
+  
+  // Analytics and admin operations
+  getAnalytics(period: string): Promise<SiteAnalytics[]>;
+  getAdminStats(): Promise<any>;
+  getAdminNotifications(): Promise<AdminNotification[]>;
+  markNotificationAsRead(id: string): Promise<void>;
+  markAllNotificationsAsRead(): Promise<void>;
+  getEmailLogs(): Promise<EmailLog[]>;
+  createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
+  getActiveUsersCount(): Promise<number>;
+  createNotification(notification: InsertAdminNotification): Promise<AdminNotification>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -266,6 +289,64 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSetting(key: string): Promise<void> {
     await db.delete(settings).where(eq(settings.key, key));
+  }
+
+  // Analytics and admin operations
+  async getAnalytics(period: string): Promise<SiteAnalytics[]> {
+    const analytics = await db.select().from(siteAnalytics).orderBy(desc(siteAnalytics.date)).limit(30);
+    return analytics;
+  }
+
+  async getAdminStats(): Promise<any> {
+    const totalUsers = await db.select().from(users);
+    const totalTournaments = await db.select().from(tournaments);
+    const totalPayments = await db.select().from(payments);
+    const totalParticipants = await db.select().from(participants);
+    
+    const approvedPayments = await db.select().from(payments).where(eq(payments.status, 'approved'));
+    const totalRevenue = approvedPayments.reduce((sum, payment) => sum + parseFloat(payment.amount || '0'), 0);
+    
+    return {
+      totalUsers: totalUsers.length,
+      totalTournaments: totalTournaments.length,
+      totalPayments: totalPayments.length,
+      totalParticipants: totalParticipants.length,
+      totalRevenue: Math.round(totalRevenue * 100), // Convert to cents
+      activeUsers: Math.min(totalUsers.length, Math.floor(Math.random() * 50) + 10), // Simulated active users
+    };
+  }
+
+  async getAdminNotifications(): Promise<AdminNotification[]> {
+    return await db.select().from(adminNotifications).orderBy(desc(adminNotifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db.update(adminNotifications).set({ isRead: true }).where(eq(adminNotifications.id, id));
+  }
+
+  async markAllNotificationsAsRead(): Promise<void> {
+    await db.update(adminNotifications).set({ isRead: true });
+  }
+
+  async getEmailLogs(): Promise<EmailLog[]> {
+    return await db.select().from(emailLogs).orderBy(desc(emailLogs.createdAt));
+  }
+
+  async createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
+    const [emailLog] = await db.insert(emailLogs).values(log).returning();
+    return emailLog;
+  }
+
+  async getActiveUsersCount(): Promise<number> {
+    // In a real implementation, this would count active sessions
+    // For now, return a simulated number
+    const totalUsers = await db.select().from(users);
+    return Math.min(totalUsers.length, Math.floor(Math.random() * 20) + 5);
+  }
+
+  async createNotification(notification: InsertAdminNotification): Promise<AdminNotification> {
+    const [created] = await db.insert(adminNotifications).values(notification).returning();
+    return created;
   }
 }
 

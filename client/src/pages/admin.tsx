@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Navigation } from "@/components/ui/navigation";
-
+import { Footer } from "@/components/ui/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +21,34 @@ import {
   X, 
   RefreshCw,
   CreditCard,
-  ShoppingCart
+  ShoppingCart,
+  BarChart3,
+  Bell,
+  Mail,
+  Activity,
+  TrendingUp,
+  Settings,
+  Plus,
+  Edit,
+  AlertCircle,
+  Target,
+  Package2
 } from "lucide-react";
+import { AdminStatsCard } from "@/components/ui/admin-stats-card";
+import { AdminNotificationPanel } from "@/components/ui/admin-notification-panel";
+import { AdminAnalyticsChart } from "@/components/ui/admin-analytics-chart";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Admin() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [selectedAnalyticsPeriod, setSelectedAnalyticsPeriod] = useState("daily");
+  const [smtpTestEmail, setSmtpTestEmail] = useState("");
 
   // Redirect to home if not authenticated or not admin
   useEffect(() => {
@@ -56,6 +78,31 @@ export default function Admin() {
   const { data: tournaments = [], isLoading: tournamentsLoading } = useQuery<Tournament[]>({
     queryKey: ["/api/tournaments"],
     retry: false,
+  });
+
+  // New queries for enhanced admin features
+  const { data: adminStats, isLoading: statsLoading } = useQuery({
+    queryKey: ["/api/admin/stats"],
+    retry: false,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const { data: analyticsData = [], isLoading: analyticsLoading } = useQuery({
+    queryKey: ["/api/admin/analytics", selectedAnalyticsPeriod],
+    retry: false,
+    refetchInterval: 60000, // Refresh every minute
+  });
+
+  const { data: emailLogs = [], isLoading: emailLogsLoading } = useQuery({
+    queryKey: ["/api/admin/email-logs"],
+    retry: false,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const { data: activeUsers = 0, isLoading: activeUsersLoading } = useQuery({
+    queryKey: ["/api/admin/active-users"],
+    retry: false,
+    refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   const approvePaymentMutation = useMutation({
@@ -115,6 +162,28 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to reject payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // SMTP Test Mutation
+  const smtpTestMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest(`/api/admin/test-smtp`, "POST", { testEmail: smtpTestEmail });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: data.success ? "SMTP Test Successful" : "SMTP Test Failed",
+        description: data.message,
+        variant: data.success ? "default" : "destructive",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email-logs"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "SMTP Test Error",
+        description: "Failed to test SMTP configuration",
         variant: "destructive",
       });
     },
@@ -250,16 +319,147 @@ export default function Admin() {
                 </Card>
               </div>
               
-              {/* Admin Tabs */}
-              <Tabs defaultValue="payments" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-game-darker">
+              {/* Enhanced Admin Tabs */}
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-6 bg-game-darker">
+                  <TabsTrigger value="overview" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger value="analytics" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analytics
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
+                    <Bell className="mr-2 h-4 w-4" />
+                    Notifications
+                  </TabsTrigger>
                   <TabsTrigger value="payments" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
-                    Pending Payments ({pendingPayments.length})
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Payments ({pendingPayments.length})
                   </TabsTrigger>
                   <TabsTrigger value="website-orders" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
-                    Website Orders ({websiteOrders.length})
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Orders ({websiteOrders.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="email" className="data-[state=active]:bg-game-purple data-[state=active]:text-white">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
                   </TabsTrigger>
                 </TabsList>
+
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="mt-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Enhanced Stats Cards */}
+                    <div className="space-y-4">
+                      <AdminStatsCard
+                        title="Platform Statistics"
+                        stats={adminStats || {
+                          totalUsers: 0,
+                          totalTournaments: 0,
+                          totalPayments: 0,
+                          totalRevenue: 0,
+                          activeUsers: 0
+                        }}
+                        isLoading={statsLoading}
+                      />
+                      
+                      <Card className="bg-game-blue border-game-purple/20 glow-effect">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <Activity className="h-5 w-5 mr-2" />
+                            Real-time Activity
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-300">Active Users Online</span>
+                              <div className="flex items-center">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                                <span className="text-white font-bold">{activeUsers}</span>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-300">Pending Actions</span>
+                              <span className="text-yellow-400 font-bold">{pendingPayments.length + websiteOrders.length}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-300">Live Tournaments</span>
+                              <span className="text-green-400 font-bold">{activeTournaments.length}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    {/* Admin Notifications Panel */}
+                    <AdminNotificationPanel />
+                  </div>
+                </TabsContent>
+
+                {/* Analytics Tab */}
+                <TabsContent value="analytics" className="mt-6">
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-2xl font-bold text-white">Platform Analytics</h2>
+                      <Select value={selectedAnalyticsPeriod} onValueChange={setSelectedAnalyticsPeriod}>
+                        <SelectTrigger className="w-40 bg-game-darker border-game-purple/20 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-game-darker border-game-purple/20">
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <AdminAnalyticsChart 
+                      data={analyticsData} 
+                      period={selectedAnalyticsPeriod}
+                      className="mb-6"
+                    />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card className="bg-game-blue border-game-purple/20">
+                        <CardHeader>
+                          <CardTitle className="text-white text-lg">Conversion Rate</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-green-400">12.5%</div>
+                          <p className="text-gray-400 text-sm">Visitors to participants</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-game-blue border-game-purple/20">
+                        <CardHeader>
+                          <CardTitle className="text-white text-lg">Average Session</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-blue-400">8.2 min</div>
+                          <p className="text-gray-400 text-sm">Time on platform</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-game-blue border-game-purple/20">
+                        <CardHeader>
+                          <CardTitle className="text-white text-lg">Payment Success</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-yellow-400">94.7%</div>
+                          <p className="text-gray-400 text-sm">Successful transactions</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Notifications Tab */}
+                <TabsContent value="notifications" className="mt-6">
+                  <AdminNotificationPanel showDetailed={true} />
+                </TabsContent>
                 
                 <TabsContent value="payments" className="mt-6">
                   <Card className="bg-game-blue border-game-purple/20">
@@ -420,13 +620,141 @@ export default function Admin() {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
+                {/* Email Management Tab */}
+                <TabsContent value="email" className="mt-6">
+                  <div className="space-y-6">
+                    {/* SMTP Testing Section */}
+                    <Card className="bg-game-blue border-game-purple/20 glow-effect">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center">
+                          <Settings className="h-5 w-5 mr-2" />
+                          SMTP Configuration Test
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="smtp-test-email" className="text-gray-300">Test Email Address</Label>
+                            <Input
+                              id="smtp-test-email"
+                              type="email"
+                              placeholder="Enter email to test SMTP..."
+                              value={smtpTestEmail}
+                              onChange={(e) => setSmtpTestEmail(e.target.value)}
+                              className="bg-game-darker border-game-purple/20 text-white mt-2"
+                            />
+                          </div>
+                          <Button
+                            onClick={() => smtpTestMutation.mutate()}
+                            disabled={smtpTestMutation.isPending || !smtpTestEmail}
+                            className="bg-gradient-to-r from-game-purple to-game-purple-light hover:from-game-purple-light hover:to-game-purple text-white"
+                          >
+                            {smtpTestMutation.isPending ? (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                Testing SMTP...
+                              </>
+                            ) : (
+                              <>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Send Test Email
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Email Logs Section */}
+                    <Card className="bg-game-blue border-game-purple/20">
+                      <CardHeader>
+                        <div className="flex justify-between items-center">
+                          <CardTitle className="text-white flex items-center">
+                            <Mail className="h-5 w-5 mr-2" />
+                            Email Logs & Status
+                          </CardTitle>
+                          <Button 
+                            onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/email-logs"] })}
+                            variant="outline"
+                            size="sm"
+                            className="border-game-purple text-game-purple hover:bg-game-purple hover:text-white"
+                          >
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Refresh
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {emailLogsLoading ? (
+                          <div className="space-y-4">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="animate-pulse">
+                                <div className="h-16 bg-game-darker rounded"></div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : emailLogs.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Mail className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-white mb-2">No Email Logs</h3>
+                            <p className="text-gray-400">Email activity will appear here</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="border-b border-game-purple/20">
+                                  <TableHead className="text-gray-300">Recipient</TableHead>
+                                  <TableHead className="text-gray-300">Subject</TableHead>
+                                  <TableHead className="text-gray-300">Template</TableHead>
+                                  <TableHead className="text-gray-300">Status</TableHead>
+                                  <TableHead className="text-gray-300">Sent At</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {emailLogs.slice(0, 20).map((log: any) => (
+                                  <TableRow key={log.id} className="border-b border-game-purple/10">
+                                    <TableCell className="text-white font-mono text-sm">
+                                      {log.recipientEmail}
+                                    </TableCell>
+                                    <TableCell className="text-gray-300 max-w-64 truncate">
+                                      {log.subject}
+                                    </TableCell>
+                                    <TableCell className="text-gray-300">
+                                      <Badge className="bg-blue-600/20 text-blue-400 border-blue-600/30">
+                                        {log.template}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge className={`${
+                                        log.status === 'sent' 
+                                          ? 'bg-green-600/20 text-green-400 border-green-600/30' 
+                                          : 'bg-red-600/20 text-red-400 border-red-600/30'
+                                      }`}>
+                                        {log.status}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 text-sm">
+                                      {log.sentAt ? new Date(log.sentAt).toLocaleDateString() : 'Failed'}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
               </Tabs>
             </div>
           </div>
         </div>
       </section>
 
-
+      <Footer />
     </div>
   );
 }

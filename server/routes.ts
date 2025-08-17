@@ -373,6 +373,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Admin Analytics Routes
+  app.get('/api/admin/analytics/:period', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { period } = req.params; // 'daily', 'weekly', 'monthly'
+      const analytics = await storage.getAnalytics(period);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Admin Stats Overview
+  app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  // Admin Notifications
+  app.get('/api/admin/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const notifications = await storage.getAdminNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.post('/api/admin/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      await storage.markNotificationAsRead(req.params.id);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Mark all notifications as read
+  app.post('/api/admin/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      await storage.markAllNotificationsAsRead();
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Email Logs
+  app.get('/api/admin/email-logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const emailLogs = await storage.getEmailLogs();
+      res.json(emailLogs);
+    } catch (error) {
+      console.error("Error fetching email logs:", error);
+      res.status(500).json({ message: "Failed to fetch email logs" });
+    }
+  });
+
+  // SMTP Test
+  app.post('/api/admin/test-smtp', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { testEmail } = req.body;
+      
+      // Test email sending
+      const result = await emailService.sendTestEmail(testEmail || user.email);
+      
+      // Log the test
+      await storage.createEmailLog({
+        recipientEmail: testEmail || user.email,
+        subject: "SMTP Test Email",
+        template: "smtp_test",
+        status: result.success ? "sent" : "failed",
+        error: result.error || null,
+        sentAt: result.success ? new Date().toISOString() : null,
+      });
+
+      res.json({ 
+        success: result.success, 
+        message: result.success ? "Test email sent successfully" : result.error 
+      });
+    } catch (error) {
+      console.error("Error testing SMTP:", error);
+      res.status(500).json({ message: "Failed to test SMTP", error: error.message });
+    }
+  });
+
+  // Active Users Count
+  app.get('/api/admin/active-users', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin' && user?.role !== 'super_admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const activeUsers = await storage.getActiveUsersCount();
+      res.json({ activeUsers });
+    } catch (error) {
+      console.error("Error fetching active users:", error);
+      res.status(500).json({ message: "Failed to fetch active users" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/ui/navigation";
-
+import { Footer } from "@/components/ui/footer";
 import CountdownTimer from "@/components/ui/countdown-timer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -419,7 +419,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-
+      <Footer />
     </div>
   );
 }

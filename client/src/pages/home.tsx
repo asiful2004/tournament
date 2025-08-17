@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigation } from "@/components/ui/navigation";
+import { Footer } from "@/components/ui/footer";
 import TournamentCard from "@/components/ui/tournament-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Users, Clock, DollarSign } from "lucide-react";
@@ -116,6 +117,7 @@ export default function Home() {
       </section>
 
 
+      <Footer />
     </div>
   );
 }
