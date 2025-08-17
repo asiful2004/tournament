@@ -394,7 +394,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Payment not found' });
       }
 
-      await storage.updatePayment(paymentId, { status: 'approved', approvedAt: new Date() });
+      await storage.updatePayment(paymentId, { 
+        status: 'approved', 
+        verifiedBy: req.user!.id 
+      });
       
       // Update participant status if it's for a tournament
       if (payment.tournamentId) {
@@ -425,8 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.updatePayment(paymentId, { 
         status: 'rejected', 
-        rejectedAt: new Date(),
-        rejectionReason: reason 
+        verifiedBy: req.user!.id 
       });
       
       // Update participant status if it's for a tournament
