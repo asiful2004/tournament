@@ -1,4 +1,16 @@
-# Vercel Deployment Guide (বাংলা)
+# Vercel Deployment Guide (বাংলা) - Updated Fix
+
+## ⚠️ Important: Build Error Fix
+আমি এইমাত্র build error fix করেছি। এখন simplified Vercel configuration ব্যবহার করা হচ্ছে।
+
+### Quick Fix Steps:
+```bash
+git add .
+git commit -m "Fix Vercel deployment configuration"
+git push
+```
+
+তারপর Vercel এ গিয়ে redeploy করুন।
 
 ## ১. GitHub এ আপলোড করুন
 
