@@ -1,7 +1,8 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { isAuthenticated, requireAdmin, hashPassword, comparePassword, generateToken, generatePasswordResetToken, resetPassword, sendPasswordResetEmail, type AuthRequest } from "./auth";
+import { isAuthenticated, requireAdmin, hashPassword, comparePassword, generateToken, generatePasswordResetToken, resetPassword, sendPasswordResetEmail } from "./auth";
+import { Request } from "express";
 import { insertTournamentSchema, insertPaymentSchema, insertParticipantSchema, insertWebsiteOrderSchema } from "@shared/schema";
 import { emailService } from "./emailService";
 import multer from "multer";
@@ -178,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'Logout successful' });
   });
 
-  app.get('/api/auth/user', isAuthenticated, async (req: AuthRequest, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: Request, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: 'Not authenticated' });
@@ -281,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tournaments', isAuthenticated, requireAdmin, upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'banner', maxCount: 1 }
-  ]), async (req: AuthRequest, res) => {
+  ]), async (req: Request, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ message: 'Not authenticated' });
@@ -318,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin panel routes
   // Get all users (admin only)
-  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);
@@ -329,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user role (admin only)
-  app.patch('/api/admin/users/:id/role', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.patch('/api/admin/users/:id/role', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const { role } = req.body;
       const userId = req.params.id;
@@ -352,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete user (admin only)
-  app.delete('/api/admin/users/:id', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.delete('/api/admin/users/:id', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const userId = req.params.id;
       
@@ -374,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pending payments (admin only)
-  app.get('/api/admin/payments/pending', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.get('/api/admin/payments/pending', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const payments = await storage.getPaymentsByStatus('pending');
       res.json(payments);
@@ -385,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Approve payment (admin only)
-  app.post('/api/admin/payments/:id/approve', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.post('/api/admin/payments/:id/approve', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const paymentId = req.params.id;
       const payment = await storage.getPayment(paymentId);
@@ -416,7 +417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reject payment (admin only)
-  app.post('/api/admin/payments/:id/reject', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.post('/api/admin/payments/:id/reject', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const paymentId = req.params.id;
       const { reason } = req.body;
@@ -448,7 +449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all tournaments (admin only)
-  app.get('/api/admin/tournaments', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.get('/api/admin/tournaments', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const tournaments = await storage.getAllTournaments();
       res.json(tournaments);
@@ -459,7 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update tournament status (admin only)
-  app.patch('/api/admin/tournaments/:id/status', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.patch('/api/admin/tournaments/:id/status', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const { status } = req.body;
       const tournamentId = req.params.id;
@@ -482,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete tournament (admin only)
-  app.delete('/api/admin/tournaments/:id', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.delete('/api/admin/tournaments/:id', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const tournamentId = req.params.id;
       
@@ -500,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Settings routes
-  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const settings = await storage.getSettings();
       res.json(settings);
@@ -510,7 +511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/settings', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+  app.post('/api/admin/settings', isAuthenticated, requireAdmin, async (req: Request, res) => {
     try {
       const { key, value } = req.body;
       const setting = await storage.setSetting(key, value);

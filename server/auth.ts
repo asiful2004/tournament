@@ -7,6 +7,18 @@ import { randomUUID } from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'development-jwt-secret-key';
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        email: string;
+        role: string;
+      };
+    }
+  }
+}
+
 export interface AuthRequest extends Request {
   user?: {
     id: string;
