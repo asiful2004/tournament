@@ -1,0 +1,376 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Gaming Dark Theme Colors */
+  --game-dark: hsl(240, 39%, 9%);
+  --game-darker: hsl(240, 25%, 16%);
+  --game-blue: hsl(225, 47%, 17%);
+  --game-purple: hsl(260, 84%, 57%);
+  --game-purple-light: hsl(260, 84%, 67%);
+  --game-pink: hsl(310, 84%, 57%);
+  
+  /* Base Theme Colors */
+  --background: var(--game-dark);
+  --foreground: hsl(210, 6.67%, 91.18%);
+  --card: var(--game-blue);
+  --card-foreground: hsl(210, 6.67%, 91.18%);
+  --popover: var(--game-darker);
+  --popover-foreground: hsl(210, 6.67%, 91.18%);
+  --primary: var(--game-purple);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: var(--game-darker);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(240, 9.8%, 25%);
+  --muted-foreground: hsl(210, 3.39%, 46.27%);
+  --accent: var(--game-blue);
+  --accent-foreground: var(--game-purple);
+  --destructive: hsl(356, 90.56%, 54.31%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(260, 84%, 57%, 0.2);
+  --input: var(--game-darker);
+  --ring: var(--game-purple);
+  
+  /* Chart Colors */
+  --chart-1: var(--game-purple);
+  --chart-2: hsl(159.78%, 100%, 36.08%);
+  --chart-3: hsl(42.03%, 92.83%, 56.27%);
+  --chart-4: hsl(147.14%, 78.50%, 41.96%);
+  --chart-5: hsl(341.49%, 75.20%, 50.98%);
+  
+  /* Sidebar Colors */
+  --sidebar: var(--game-blue);
+  --sidebar-foreground: hsl(210, 6.67%, 91.18%);
+  --sidebar-primary: var(--game-purple);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: var(--game-darker);
+  --sidebar-accent-foreground: var(--game-purple);
+  --sidebar-border: hsl(260, 84%, 57%, 0.2);
+  --sidebar-ring: var(--game-purple);
+  
+  /* Typography */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  /* Border Radius */
+  --radius: 0.75rem;
+  
+  /* Custom Gaming Effects */
+  --glow: 0 0 20px hsl(260, 84%, 57%, 0.3);
+  --glow-strong: 0 0 30px hsl(260, 84%, 57%, 0.5);
+  --glow-intense: 0 0 40px hsl(260, 84%, 57%, 0.7);
+}
+
+.dark {
+  /* Dark mode is default for gaming theme */
+  --background: var(--game-dark);
+  --foreground: hsl(210, 6.67%, 91.18%);
+  --card: var(--game-blue);
+  --card-foreground: hsl(210, 6.67%, 91.18%);
+  --popover: var(--game-darker);
+  --popover-foreground: hsl(210, 6.67%, 91.18%);
+  --primary: var(--game-purple);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: var(--game-darker);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(240, 9.8%, 25%);
+  --muted-foreground: hsl(210, 3.39%, 46.27%);
+  --accent: var(--game-blue);
+  --accent-foreground: var(--game-purple);
+  --destructive: hsl(356, 90.56%, 54.31%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(260, 84%, 57%, 0.2);
+  --input: var(--game-darker);
+  --ring: var(--game-purple);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--game-dark) 0%, var(--game-darker) 100%);
+    min-height: 100vh;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Gaming Effects */
+  .glow-effect {
+    box-shadow: var(--glow);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .glow-effect:hover {
+    box-shadow: var(--glow-strong);
+  }
+  
+  /* Countdown Timer Styling */
+  .countdown-digit {
+    background: linear-gradient(135deg, var(--game-purple), var(--game-purple-light));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
+  /* Tournament Card Styling */
+  .tournament-card {
+    background: linear-gradient(135deg, 
+      hsl(260, 84%, 57%, 0.1), 
+      hsl(225, 47%, 17%, 0.8)
+    );
+    border: 1px solid hsl(260, 84%, 57%, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Payment Method Cards */
+  .payment-method {
+    background: linear-gradient(135deg, 
+      hsl(260, 84%, 57%, 0.1), 
+      hsl(225, 47%, 17%, 0.6)
+    );
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .payment-method:hover {
+    border-color: var(--game-purple);
+    box-shadow: 0 0 15px hsl(260, 84%, 57%, 0.3);
+  }
+  
+  /* Status Colors */
+  .status-pending { 
+    color: hsl(42, 100%, 50%); 
+  }
+  
+  .status-approved { 
+    color: hsl(159, 75%, 45%); 
+  }
+  
+  .status-rejected { 
+    color: hsl(356, 75%, 55%); 
+  }
+  
+  /* Navigation Active State */
+  .nav-active {
+    background: linear-gradient(135deg, var(--game-purple), var(--game-purple-light));
+    color: white;
+  }
+  
+  /* Live Indicator Animation */
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(260, 84%, 57%, 0.3); 
+    }
+    50% { 
+      box-shadow: 0 0 30px hsl(260, 84%, 57%, 0.6); 
+    }
+  }
+  
+  .live-indicator {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  /* Custom Scrollbar for Dark Theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--game-darker);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--game-purple);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--game-purple-light);
+  }
+  
+  /* Button Glow Effects */
+  .btn-glow {
+    box-shadow: 0 0 20px hsl(260, 84%, 57%, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-glow:hover {
+    box-shadow: 0 0 30px hsl(260, 84%, 57%, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Card Hover Effects */
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow-strong);
+  }
+  
+  /* Gaming Typography */
+  .gaming-title {
+    background: linear-gradient(135deg, var(--game-purple), var(--game-purple-light));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
+  /* Modal and Dialog Overlays */
+  .modal-overlay {
+    background: hsl(240, 39%, 9%, 0.8);
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Tournament Grid Responsive */
+  .tournament-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .tournament-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Form Styling */
+  .form-dark input,
+  .form-dark textarea,
+  .form-dark select {
+    background: var(--game-darker);
+    border: 1px solid hsl(260, 84%, 57%, 0.3);
+    color: white;
+  }
+  
+  .form-dark input:focus,
+  .form-dark textarea:focus,
+  .form-dark select:focus {
+    border-color: var(--game-purple);
+    box-shadow: 0 0 0 2px hsl(260, 84%, 57%, 0.2);
+  }
+  
+  /* Badge Variants */
+  .badge-success {
+    background: hsl(159, 75%, 45%, 0.2);
+    color: hsl(159, 75%, 65%);
+    border: 1px solid hsl(159, 75%, 45%, 0.3);
+  }
+  
+  .badge-warning {
+    background: hsl(42, 100%, 50%, 0.2);
+    color: hsl(42, 100%, 70%);
+    border: 1px solid hsl(42, 100%, 50%, 0.3);
+  }
+  
+  .badge-error {
+    background: hsl(356, 75%, 55%, 0.2);
+    color: hsl(356, 75%, 75%);
+    border: 1px solid hsl(356, 75%, 55%, 0.3);
+  }
+}
+
+@layer utilities {
+  /* Gaming Theme Utilities */
+  .bg-game-dark {
+    background-color: var(--game-dark);
+  }
+  
+  .bg-game-darker {
+    background-color: var(--game-darker);
+  }
+  
+  .bg-game-blue {
+    background-color: var(--game-blue);
+  }
+  
+  .bg-game-purple {
+    background-color: var(--game-purple);
+  }
+  
+  .bg-game-purple-light {
+    background-color: var(--game-purple-light);
+  }
+  
+  .bg-game-pink {
+    background-color: var(--game-pink);
+  }
+  
+  .text-game-purple {
+    color: var(--game-purple);
+  }
+  
+  .text-game-purple-light {
+    color: var(--game-purple-light);
+  }
+  
+  .text-game-pink {
+    color: var(--game-pink);
+  }
+  
+  .border-game-purple {
+    border-color: var(--game-purple);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--glow);
+  }
+  
+  .shadow-glow-strong {
+    box-shadow: var(--glow-strong);
+  }
+  
+  .shadow-glow-intense {
+    box-shadow: var(--glow-intense);
+  }
+  
+  /* Animation Utilities */
+  .animate-glow {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Text Gradient Utilities */
+  .text-gradient-purple {
+    background: linear-gradient(135deg, var(--game-purple), var(--game-purple-light));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
+  /* Responsive Utilities */
+  .container-game {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .container-game {
+      padding: 0 2rem;
+    }
+  }
+}
