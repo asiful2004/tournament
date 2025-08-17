@@ -4,8 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -426,7 +426,7 @@ export default function Admin() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { Navigation } from '@/components/ui/navigation';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -36,11 +36,18 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      const response = await apiRequest('/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
-      return response;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+      }
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -70,7 +77,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-black p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-black">
+      <Navigation />
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
       <Card className="w-full max-w-md bg-gray-900/90 border-purple-500/20">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-white">
@@ -133,7 +142,7 @@ export default function Login() {
                         data-testid="checkbox-remember"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-gray-600"
+                        className="border-gray-600 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -178,6 +187,7 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

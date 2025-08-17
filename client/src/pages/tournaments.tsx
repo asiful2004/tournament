@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
+
 import TournamentCard from "@/components/ui/tournament-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -118,7 +118,7 @@ export default function Tournaments() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

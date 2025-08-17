@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
 import { Trophy, Flame, Crown, Clock, TriangleAlert } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -24,13 +23,32 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="text-white">Epic </span>
-            <span className="text-game-purple">Free Flame</span>
+            <span className="text-game-purple">Free Fire</span>
             <span className="text-white"> Tournaments</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join competitive Free Flame tournaments, compete with skilled players, and win amazing cash prizes. 
+            Join competitive Free Fire tournaments, compete with skilled players, and win amazing cash prizes. 
             <span className="text-game-purple font-semibold"> Age 15+ required.</span>
           </p>
+          
+          {/* Trust Building Section */}
+          <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 max-w-4xl mx-auto mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Why Join SkillsMoney Tournaments?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-green-400 font-bold text-lg">✓ Secure</div>
+                <div className="text-gray-300">Your payments and data are 100% safe</div>
+              </div>
+              <div className="text-center">
+                <div className="text-green-400 font-bold text-lg">✓ Fair</div>
+                <div className="text-gray-300">Equal opportunity gaming for all players</div>
+              </div>
+              <div className="text-center">
+                <div className="text-green-400 font-bold text-lg">✓ Trusted</div>
+                <div className="text-gray-300">Join thousands of satisfied gamers</div>
+              </div>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               onClick={() => setLocation('/login')}
@@ -67,7 +85,7 @@ export default function Landing() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="tournament-card">
+            <Card className="bg-gray-900/50 border-purple-500/20">
               <CardContent className="p-6 text-center">
                 <Trophy className="h-12 w-12 text-game-purple mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-white mb-2">Competitive Tournaments</h3>
@@ -75,7 +93,7 @@ export default function Landing() {
               </CardContent>
             </Card>
             
-            <Card className="tournament-card">
+            <Card className="bg-gray-900/50 border-purple-500/20">
               <CardContent className="p-6 text-center">
                 <Clock className="h-12 w-12 text-game-purple mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-white mb-2">Real-time Updates</h3>
@@ -83,7 +101,7 @@ export default function Landing() {
               </CardContent>
             </Card>
             
-            <Card className="tournament-card">
+            <Card className="bg-gray-900/50 border-purple-500/20">
               <CardContent className="p-6 text-center">
                 <Crown className="h-12 w-12 text-game-purple mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-white mb-2">Secure Payments</h3>
@@ -100,10 +118,10 @@ export default function Landing() {
           <div className="bg-gradient-to-r from-game-purple/20 to-game-pink/20 rounded-2xl p-8 border border-game-purple/30 glow-effect">
             <h2 className="text-4xl font-bold text-white mb-4">Ready to Compete?</h2>
             <p className="text-xl text-gray-300 mb-8">
-              Join thousands of players in epic Free Flame tournaments
+              Join thousands of players in epic Free Fire tournaments
             </p>
             <Button 
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setLocation('/register')}
               className="bg-gradient-to-r from-game-purple to-game-purple-light px-8 py-4 rounded-xl font-bold text-lg glow-effect hover:scale-105 transition-transform"
               data-testid="button-get-started"
             >
@@ -113,7 +131,42 @@ export default function Landing() {
         </div>
       </section>
 
-      <Footer />
+      
+      {/* Testimonials Section */}
+      <section className="py-16 px-4 bg-gray-900/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">Winner Showcase</h2>
+            <p className="text-gray-300 text-lg">See what our champions have to say</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-gray-900/50 border-purple-500/20">
+              <CardContent className="p-6">
+                <div className="text-yellow-400 text-lg mb-2">⭐⭐⭐⭐⭐</div>
+                <p className="text-gray-300 mb-4">"Won ৳5,000 in my first tournament! Fast payout, no hassles."</p>
+                <div className="text-purple-400 font-semibold">- Champion Player</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gray-900/50 border-purple-500/20">
+              <CardContent className="p-6">
+                <div className="text-yellow-400 text-lg mb-2">⭐⭐⭐⭐⭐</div>
+                <p className="text-gray-300 mb-4">"Safe platform, fair gameplay. Highly recommended!"</p>
+                <div className="text-purple-400 font-semibold">- Pro Gamer</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gray-900/50 border-purple-500/20">
+              <CardContent className="p-6">
+                <div className="text-yellow-400 text-lg mb-2">⭐⭐⭐⭐⭐</div>
+                <p className="text-gray-300 mb-4">"Best tournament platform in Bangladesh. Amazing experience!"</p>
+                <div className="text-purple-400 font-semibold">- Elite Player</div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

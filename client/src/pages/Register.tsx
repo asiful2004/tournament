@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { Navigation } from '@/components/ui/navigation';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -47,11 +47,18 @@ export default function Register() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      const response = await apiRequest('/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
-      return response;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -75,7 +82,9 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-black p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-black">
+      <Navigation />
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
       <Card className="w-full max-w-md bg-gray-900/90 border-purple-500/20">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-white">
@@ -173,6 +182,9 @@ export default function Register() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-200">Date of Birth</FormLabel>
+                    <p className="text-sm text-orange-400 mb-2">
+                      ⚠️ Minimum age 15+ years required to participate
+                    </p>
                     <FormControl>
                       <Input
                         {...field}
@@ -196,7 +208,7 @@ export default function Register() {
                         data-testid="checkbox-terms"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-gray-600"
+                        className="border-gray-600 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -222,7 +234,7 @@ export default function Register() {
                         data-testid="checkbox-privacy"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-gray-600"
+                        className="border-gray-600 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -263,6 +275,7 @@ export default function Register() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

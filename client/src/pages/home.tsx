@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
 import TournamentCard from "@/components/ui/tournament-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Users, Clock, DollarSign } from "lucide-react";
@@ -30,7 +29,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              Welcome back, <span className="text-game-purple">{user?.firstName || 'Gamer'}</span>!
+              Welcome back, <span className="text-game-purple">{user?.name || 'Gamer'}</span>!
             </h1>
             <p className="text-xl text-gray-300">Ready for your next epic battle?</p>
           </div>
@@ -116,7 +115,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

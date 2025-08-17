@@ -1,5 +1,4 @@
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TriangleAlert, Shield, Users, CreditCard } from "lucide-react";
 
@@ -182,7 +181,7 @@ export default function Terms() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

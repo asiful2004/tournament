@@ -63,6 +63,32 @@
   --glow-intense: 0 0 40px hsl(260, 84%, 57%, 0.7);
 }
 
+/* Improved Checkbox visibility */
+[data-state="checked"] {
+  background: var(--game-purple) !important;
+  border-color: var(--game-purple) !important;
+  box-shadow: 0 0 10px hsl(260, 84%, 57%, 0.4);
+}
+
+/* Toast notification styling fixes */
+.toast {
+  background: var(--game-darker) !important;
+  border: 1px solid var(--game-purple) !important;
+  color: hsl(210, 6.67%, 91.18%) !important;
+}
+
+.toast[data-type="error"] {
+  background: hsl(356, 90.56%, 54.31%, 0.9) !important;
+  border-color: hsl(356, 90.56%, 54.31%) !important;
+  color: white !important;
+}
+
+.toast[data-type="success"] {
+  background: hsl(147.14%, 78.50%, 41.96%, 0.9) !important;
+  border-color: hsl(147.14%, 78.50%, 41.96%) !important;
+  color: white !important;
+}
+
 .dark {
   /* Dark mode is default for gaming theme */
   --background: var(--game-dark);

@@ -1,292 +1,164 @@
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useLocation, Link } from "wouter";
-import { 
-  Flame, 
-  Trophy, 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Menu, 
-  X, 
-  User, 
-  LogOut, 
-  Shield,
-  UserPlus,
-  LogIn
-} from "lucide-react";
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export default function Navigation() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [_, setLocation] = useLocation();
-  const isMobile = useIsMobile();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // For now, assume user is not authenticated since we disabled the auth query
-  const actuallyAuthenticated = false;
+interface NavigationProps {
+  className?: string;
+}
 
-  const navigationItems = [
-    { href: "/tournaments", label: "Tournaments", icon: Trophy },
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requireAuth: true },
-    { href: "/buy-website", label: "Buy Website", icon: ShoppingCart },
-  ];
+export function Navigation({ className = '' }: NavigationProps) {
+  const [location, setLocation] = useLocation();
+  const { isAuthenticated, user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Logout failed');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      setLocation('/');
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
-    <nav className="bg-game-darker border-b border-game-purple/20 sticky top-0 z-50">
+    <nav className={`bg-gray-900/95 border-b border-purple-500/20 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Brand */}
-          <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-3" data-testid="brand-link">
-              <Flame className="text-game-purple text-2xl h-8 w-8" />
-              <span className="text-xl font-bold text-white">FF Tournament Hub</span>
-            </Link>
+          {/* Logo */}
+          <div className="flex items-center">
+            <button
+              onClick={() => setLocation('/')}
+              className="text-xl font-bold text-white hover:text-purple-400 transition-colors"
+              data-testid="logo-button"
+            >
+              SkillsMoney
+            </button>
           </div>
 
-          {/* Desktop Navigation */}
-          {!isMobile && (
-            <div className="hidden md:flex items-center space-x-8">
-              <div className="flex space-x-6">
-                {navigationItems.map((item) => {
-                  if (item.requireAuth && !actuallyAuthenticated) return null;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="text-gray-300 hover:text-game-purple transition-colors flex items-center"
-                      data-testid={`nav-link-${item.label.toLowerCase().replace(' ', '-')}`}
-                    >
-                      <item.icon className="mr-1 h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-                {actuallyAuthenticated && user?.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="text-gray-300 hover:text-game-purple transition-colors flex items-center"
-                    data-testid="nav-link-admin"
-                  >
-                    <Shield className="mr-1 h-4 w-4" />
-                    Admin
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Main Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <button
+              onClick={() => setLocation('/')}
+              className={`text-gray-300 hover:text-white transition-colors ${location === '/' ? 'text-purple-400' : ''}`}
+              data-testid="nav-home"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => setLocation('/tournaments')}
+              className={`text-gray-300 hover:text-white transition-colors ${location === '/tournaments' ? 'text-purple-400' : ''}`}
+              data-testid="nav-tournaments"
+            >
+              Tournaments
+            </button>
+            <button
+              onClick={() => setLocation('/how-to-play')}
+              className={`text-gray-300 hover:text-white transition-colors ${location === '/how-to-play' ? 'text-purple-400' : ''}`}
+              data-testid="nav-how-to-play"
+            >
+              How to Play
+            </button>
+            <button
+              onClick={() => setLocation('/faq')}
+              className={`text-gray-300 hover:text-white transition-colors ${location === '/faq' ? 'text-purple-400' : ''}`}
+              data-testid="nav-faq"
+            >
+              FAQ
+            </button>
+            <button
+              onClick={() => setLocation('/contact')}
+              className={`text-gray-300 hover:text-white transition-colors ${location === '/contact' ? 'text-purple-400' : ''}`}
+              data-testid="nav-contact"
+            >
+              Contact Us
+            </button>
+          </div>
 
-          {/* Desktop Auth Buttons */}
-          {!isMobile && (
-            <div className="hidden md:flex items-center space-x-4">
-              {isLoading ? (
-                <div className="w-8 h-8 bg-game-purple/20 rounded-full animate-pulse"></div>
-              ) : actuallyAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2 hover:bg-game-purple/20" data-testid="user-menu-trigger">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={undefined} />
-                        <AvatarFallback className="bg-game-purple text-white">
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-white">
-                        {user?.name || user?.email?.split('@')[0] || 'User'}
-                      </span>
-                      {user?.isAgeVerified && (
-                        <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                          Verified
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-game-blue border-game-purple/30 text-white" align="end">
-                    <DropdownMenuItem asChild>
-                      <a href="/dashboard" className="cursor-pointer" data-testid="dropdown-dashboard">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Dashboard
-                      </a>
-                    </DropdownMenuItem>
-                    {isAdmin && (
-                      <DropdownMenuItem asChild>
-                        <a href="/admin" className="cursor-pointer" data-testid="dropdown-admin">
-                          <Shield className="mr-2 h-4 w-4" />
-                          Admin Panel
-                        </a>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator className="bg-game-purple/20" />
-                    <DropdownMenuItem asChild>
-                      <a href="/api/logout" className="cursor-pointer text-red-400" data-testid="dropdown-logout">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                      </a>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <Button 
-                    onClick={() => setLocation('/register')}
-                    className="bg-game-purple hover:bg-game-purple-light px-4 py-2 rounded-lg transition-colors glow-effect"
-                    data-testid="button-register"
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Register
-                  </Button>
-                  <Button 
-                    onClick={() => setLocation('/login')}
+          {/* Auth Section */}
+          <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <>
+                <span className="text-gray-300 text-sm">
+                  Welcome, {user?.name}
+                </span>
+                {user?.role === 'admin' || user?.role === 'super_admin' ? (
+                  <Button
+                    onClick={() => setLocation('/admin')}
                     variant="outline"
-                    className="border border-game-purple text-game-purple hover:bg-game-purple hover:text-white px-4 py-2 rounded-lg transition-colors"
-                    data-testid="button-login"
+                    size="sm"
+                    className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                    data-testid="nav-admin"
                   >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
+                    Admin Panel
                   </Button>
-                </div>
-              )}
-            </div>
-          )}
+                ) : (
+                  <Button
+                    onClick={() => setLocation('/dashboard')}
+                    variant="outline"
+                    size="sm"
+                    className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                    data-testid="nav-dashboard"
+                  >
+                    Dashboard
+                  </Button>
+                )}
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-white"
+                  disabled={logoutMutation.isPending}
+                  data-testid="nav-logout"
+                >
+                  {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setLocation('/login')}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                  data-testid="nav-login"
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => setLocation('/register')}
+                  size="sm"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  data-testid="nav-register"
+                >
+                  Register
+                </Button>
+              </>
+            )}
+          </div>
 
-          {/* Mobile Menu Button */}
-          {isMobile && (
+          {/* Mobile menu button */}
+          <div className="md:hidden">
             <Button
               variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-white hover:bg-game-purple/20"
+              size="sm"
+              className="text-gray-300 hover:text-white"
               data-testid="mobile-menu-button"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              ☰
             </Button>
-          )}
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobile && isMobileMenuOpen && (
-          <div className="md:hidden border-t border-game-purple/20">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Navigation Links */}
-              {navigationItems.map((item) => {
-                if (item.requireAuth && !isAuthenticated) return null;
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    className="text-gray-300 hover:text-game-purple block px-3 py-2 rounded-md text-base font-medium flex items-center"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    data-testid={`mobile-nav-${item.label.toLowerCase().replace(' ', '-')}`}
-                  >
-                    <item.icon className="mr-2 h-5 w-5" />
-                    {item.label}
-                  </a>
-                );
-              })}
-              
-              {isAdmin && (
-                <a
-                  href="/admin"
-                  className="text-gray-300 hover:text-game-purple block px-3 py-2 rounded-md text-base font-medium flex items-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  data-testid="mobile-nav-admin"
-                >
-                  <Shield className="mr-2 h-5 w-5" />
-                  Admin Panel
-                </a>
-              )}
-
-              {/* Auth Section */}
-              <div className="border-t border-game-purple/20 pt-4">
-                {isLoading ? (
-                  <div className="px-3 py-2">
-                    <div className="w-full h-10 bg-game-purple/20 rounded animate-pulse"></div>
-                  </div>
-                ) : isAuthenticated ? (
-                  <div className="space-y-2">
-                    {/* User Info */}
-                    <div className="px-3 py-2 flex items-center space-x-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={undefined} />
-                        <AvatarFallback className="bg-game-purple text-white">
-                          <User className="h-5 w-5" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-white font-medium">
-                          {user?.name || user?.email?.split('@')[0] || 'User'}
-                        </div>
-                        {user?.isAgeVerified && (
-                          <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Dashboard Link */}
-                    <a
-                      href="/dashboard"
-                      className="text-gray-300 hover:text-game-purple block px-3 py-2 rounded-md text-base font-medium flex items-center"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      data-testid="mobile-nav-dashboard"
-                    >
-                      <LayoutDashboard className="mr-2 h-5 w-5" />
-                      Dashboard
-                    </a>
-                    
-                    {/* Logout */}
-                    <a
-                      href="/api/logout"
-                      className="text-red-400 hover:text-red-300 block px-3 py-2 rounded-md text-base font-medium flex items-center"
-                      data-testid="mobile-nav-logout"
-                    >
-                      <LogOut className="mr-2 h-5 w-5" />
-                      Logout
-                    </a>
-                  </div>
-                ) : (
-                  <div className="space-y-2 px-3">
-                    <Button 
-                      onClick={() => {
-                        setLocation('/register');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full bg-game-purple hover:bg-game-purple-light glow-effect"
-                      data-testid="mobile-button-register"
-                    >
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Register
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        setLocation('/login');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      variant="outline"
-                      className="w-full border-game-purple text-game-purple hover:bg-game-purple hover:text-white"
-                      data-testid="mobile-button-login"
-                    >
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Login
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );

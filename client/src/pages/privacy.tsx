@@ -1,5 +1,4 @@
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Eye, Lock, Database, Mail, Users } from "lucide-react";
 
@@ -257,7 +256,7 @@ export default function Privacy() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

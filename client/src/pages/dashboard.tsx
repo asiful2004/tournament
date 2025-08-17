@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/ui/navigation";
-import Footer from "@/components/ui/footer";
+import { Navigation } from "@/components/ui/navigation";
+
 import CountdownTimer from "@/components/ui/countdown-timer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,16 +92,13 @@ export default function Dashboard() {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <Avatar className="w-20 h-20 mx-auto mb-4">
-                      <AvatarImage src={user?.profileImageUrl || undefined} />
+                      <AvatarImage src={undefined} />
                       <AvatarFallback className="bg-gradient-to-r from-game-purple to-game-purple-light text-white text-2xl">
                         <User className="h-8 w-8" />
                       </AvatarFallback>
                     </Avatar>
                     <h3 className="text-xl font-bold text-white" data-testid="text-username">
-                      {user?.firstName && user?.lastName 
-                        ? `${user.firstName} ${user.lastName}`
-                        : user?.email?.split('@')[0] || 'Player'
-                      }
+                      {user?.name || user?.email?.split('@')[0] || 'Player'}
                     </h3>
                     <p className="text-gray-300" data-testid="text-email">{user?.email}</p>
                     <div className="mt-2">
@@ -422,7 +419,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <Footer />
+
     </div>
   );
 }

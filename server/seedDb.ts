@@ -4,15 +4,15 @@ import { hashPassword } from './auth';
 export async function seedDatabase() {
   try {
     // Check if admin already exists
-    const existingAdmin = await storage.getUserByEmail('admin@skillsmoney.com');
+    const existingAdmin = await storage.getUserByEmail('asiful2004@yahoo.com');
     
     if (!existingAdmin) {
       // Create demo admin account
-      const hashedPassword = await hashPassword('Admin@123');
+      const hashedPassword = await hashPassword('1234');
       
       const admin = await storage.createUser({
         name: 'Demo Admin',
-        email: 'admin@skillsmoney.com',
+        email: 'asiful2004@yahoo.com',
         password: hashedPassword,
         role: 'admin',
         isAgeVerified: true,

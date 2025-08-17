@@ -18,12 +18,24 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import HowToPlay from "@/pages/how-to-play";
+import FAQ from "@/pages/faq";
+import Contact from "@/pages/contact";
 
 function Router() {
-  // For now, assume user is not authenticated by default
-  // The authentication will be handled in the login/register forms
-  const isAuthenticated = false;
-  const isAdmin = false;
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-black">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Switch>
@@ -53,6 +65,9 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/refund" component={Refund} />
+      <Route path="/how-to-play" component={HowToPlay} />
+      <Route path="/faq" component={FAQ} />
+      <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );

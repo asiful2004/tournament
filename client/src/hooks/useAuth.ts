@@ -14,15 +14,30 @@ export function useAuth() {
     queryKey: ["/api/auth/user"],
     staleTime: 1000 * 60 * 5,
     retry: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
-    enabled: false, // Disable automatic execution
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
+        });
+        if (response.status === 401) {
+          return null; // Not authenticated
+        }
+        if (!response.ok) {
+          throw new Error('Failed to fetch user');
+        }
+        return response.json();
+      } catch (err) {
+        return null;
+      }
+    }
   });
 
   return {
     user,
     isLoading,
-    isAuthenticated: !!user && !error,
+    isAuthenticated: !!user,
     isAdmin: user?.role === 'admin' || user?.role === 'super_admin',
     error,
   };

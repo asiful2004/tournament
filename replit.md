@@ -6,7 +6,12 @@ This is a full-stack web application for hosting Free Fire gaming tournaments wi
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- **Communication style**: Simple, everyday language
+- **Admin credentials**: asiful2004@yahoo.com / password: 1234 (must remain unchanged)
+- **Navigation**: Must be visible on all pages including login/register
+- **Age requirement**: 15+ years must be displayed on registration, tournament join, and terms pages
+- **Refund policy**: "No Refunds" policy should only appear in Terms & Conditions, not elsewhere
+- **Trust building**: Include testimonials, security messaging, and clear call-to-action buttons
 
 ## System Architecture
 
@@ -99,3 +104,30 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Banking**: bKash and Nagad (manual verification process)
 - **Transaction Tracking**: Custom payment verification system
 - **No Automated Gateways**: All payments processed manually through admin interface
+
+## Recent Changes (Migration to Replit)
+
+### Navigation and UI Improvements
+- ✅ Created unified navigation component with proper authentication state
+- ✅ Added navigation to all pages including login/register
+- ✅ Enhanced checkbox visibility with purple theme
+- ✅ Improved toast notification styling
+- ✅ Fixed authentication hook to handle 401 responses properly
+
+### New Pages Added
+- ✅ How to Play page with step-by-step tournament guide
+- ✅ FAQ page with comprehensive Q&A and age requirements
+- ✅ Contact page with support information and contact form
+- ✅ Enhanced landing page with trust-building content and testimonials
+
+### Content Enhancements
+- ✅ Added minimum age 15+ requirement notices across relevant pages
+- ✅ Enhanced landing page with motivational content and winner showcases
+- ✅ Added trust-building sections with security messaging
+- ✅ Improved Terms & Conditions with clear no-refund policy
+
+### Technical Updates
+- ✅ Fixed import/export issues with navigation component
+- ✅ Updated App.tsx routes to include new pages
+- ✅ Enhanced CSS styling for gaming theme consistency
+- ✅ Fixed authentication flow and session management
