@@ -1,0 +1,284 @@
+Build a Free Fire Tournament Website — “skills=money” (PHP + MySQL)
+Goal
+
+Create a full-stack PHP + MySQL web application for Free Fire tournaments with:
+
+User accounts (login/register, age restriction 15+)
+
+Admin panel for tournament creation/management
+
+Payment submission (manual via bKash & Nagad)
+
+Automatic tournament email reminders (−30 min, −20 min, −5 min)
+
+User dashboards with countdown timers and secret match info revealed at T−5 minutes
+
+A section where users can buy this website source code (manual payment, one-time download link).
+
+Branding: dark theme with purple & black colors.
+
+SEO optimized + Terms/Privacy/Refund pages.
+
+Minimum age enforcement (15+).
+
+No refunds (must be visible everywhere).
+
+Tech Stack
+
+Backend: PHP 8+ (OOP, MVC structure — use Laravel if possible, otherwise custom MVC)
+
+Database: MySQL 8+
+
+Frontend: HTML5, CSS3, Bootstrap/Tailwind (dark + purple/black)
+
+Email: PHPMailer (SMTP support)
+
+Scheduler: PHP cron jobs for reminder emails
+
+Security: password hashing (bcrypt), CSRF tokens, prepared statements
+
+Roles & Permissions
+
+User → Can register/login, join tournaments, submit payments.
+
+Admin → Create/edit tournaments, approve/reject payments, manage participants, deliver website downloads.
+
+Super Admin → Full system access + admin management.
+
+Payments (Manual – Bangladesh)
+
+Payment numbers (fixed in settings):
+
+bKash: 01926298571
+
+Nagad: 01926298571
+
+User pays externally → then submits in site:
+
+Method (bKash/Nagad)
+
+Payer Number
+
+Transaction ID
+
+Status: Pending → Admin approves/rejects → Approved users can join tournament.
+
+Tournament Features
+
+Admin defines:
+
+Tournament Name
+
+Description (rich text)
+
+Logo + Banner (uploads)
+
+Game (default Free Fire, but editable)
+
+Game Mode (Solo, Squad)
+
+Start Time (Asia/Dhaka timezone)
+
+Entry Fee (BDT)
+
+Prize tiers: 1st / 2nd / 3rd
+
+Secret match info: Room ID, Password, Party Code (revealed only at T−5m)
+
+Participant limit (optional)
+
+User Dashboard:
+
+Shows tournaments joined
+
+Countdown timer until start
+
+Tournament details + payment status
+
+Secret info unlocks at T−5 minutes
+
+Automated Emails (via cron job)
+
+Participants (approved) get automatic reminders:
+
+30 minutes before start
+
+20 minutes before start
+
+5 minutes before start (includes secret match info if available)
+
+Other emails:
+
+Registration confirmation (with 15+ rule)
+
+Payment submitted
+
+Payment approved/rejected
+
+Tournament entry confirmation
+
+Website purchase download link
+
+“Buy This Website” Section
+
+Public page advertising site for sale
+
+Manual payment (bKash/Nagad) → user submits Txn ID → admin verifies
+
+Admin approves → system generates a unique, expiring download link (ZIP source code)
+
+Link emailed + shown in dashboard
+
+No refunds
+
+Database Schema (MySQL tables)
+
+users
+
+id (PK, AUTO)
+
+name, email (unique), password (hashed), dob (DATE), role (ENUM: user/admin/super_admin)
+
+created_at, updated_at
+
+tournaments
+
+id (PK)
+
+name, description, logo, banner
+
+game, mode, match_type (solo/squad)
+
+entry_fee, start_time (DATETIME)
+
+prize1, prize2, prize3
+
+room_id, room_password, party_code (encrypted or stored hidden until T−5m)
+
+status (draft/published/finished/canceled)
+
+created_by (FK → users)
+
+participants
+
+id (PK)
+
+user_id (FK → users)
+
+tournament_id (FK → tournaments)
+
+status (pending_payment, pending_verify, approved, rejected)
+
+payment_id (FK → payments)
+
+created_at
+
+payments
+
+id (PK)
+
+user_id, tournament_id
+
+method (bkash/nagad)
+
+payer_number, txn_id
+
+amount, verified (boolean), verified_by (admin_id)
+
+created_at
+
+reminders
+
+id (PK)
+
+participant_id
+
+milestone (m30/m20/m5)
+
+sent_at
+
+orders (buy_website)
+
+id (PK)
+
+user_id
+
+method, payer_number, txn_id
+
+amount, status (pending, approved, rejected, delivered)
+
+download_token, download_expires_at
+
+created_at
+
+audit_logs
+
+id, actor_id, action, meta, created_at
+
+Admin Panel Features
+
+CRUD tournaments (logo/banner upload)
+
+Approve/Reject payments
+
+Add secret match info (reveals only at T−5m)
+
+Manage participants
+
+Approve/Reject website orders + generate download link
+
+Manage admins & roles
+
+Audit logs
+
+SEO + Legal Pages
+
+Pages: Terms & Conditions, Privacy Policy, Refund Policy, FAQ
+
+Refund Policy: No refunds, minimum age 15+ required
+
+SEO: meta tags, OG tags, sitemap.xml, robots.txt
+
+Cron Jobs (PHP CLI or server cron)
+
+Run every 1 minute → check tournaments starting soon
+
+Send reminders (30m, 20m, 5m before start)
+
+At T−5m → email + dashboard show secret info
+
+Acceptance Criteria
+
+Users <15 cannot register (DOB validation).
+
+Admin can publish tournaments with prizes & secrets.
+
+Payments are pending until admin approves.
+
+Approved participants get emails at −30/−20/−5 minutes.
+
+Countdown & secret info reveal at T−5m.
+
+Website buy system works (manual payment → admin approves → one-time download link).
+
+Dark theme UI (purple + black).
+
+No refund policy visible everywhere.
+
+SEO fully integrated.
+
+Fully responsive (mobile/desktop).
+
+Delivery
+
+PHP project (MVC/Laravel preferred, else custom MVC)
+
+MySQL schema & migrations (SQL file)
+
+.env.example for DB & SMTP
+
+Cron job setup instructions
+
+README for local & production setup
+
+👉 Please build the full website in PHP 8 + MySQL following this exact specification.
