@@ -175,6 +175,188 @@
   opacity: 0.8;
 }
 
+/* Tournament Card Styling */
+.tournament-card {
+  background: linear-gradient(135deg, var(--game-blue) 0%, var(--game-darker) 100%);
+  border: 1px solid hsl(260, 84%, 57%, 0.2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.tournament-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, hsl(260, 84%, 57%, 0.1) 100%);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tournament-card:hover::before {
+  opacity: 0.8;
+}
+
+/* Live Tournament Pulse Effect */
+.live-indicator {
+  animation: live-pulse 2s infinite;
+  box-shadow: 0 0 20px hsl(120, 100%, 50%, 0.5);
+}
+
+@keyframes live-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(120, 100%, 50%, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px hsl(120, 100%, 50%, 0.8);
+  }
+}
+
+/* Payment Method Cards */
+.payment-method {
+  background: var(--game-darker);
+  border: 1px solid hsl(260, 84%, 57%, 0.2);
+  transition: all 0.3s ease;
+}
+
+.payment-method:hover {
+  background: var(--game-blue);
+  border-color: var(--game-purple);
+  box-shadow: var(--glow);
+}
+
+/* Countdown Timer Digits */
+.countdown-digit {
+  color: var(--game-purple);
+  text-shadow: 0 0 10px hsl(260, 84%, 57%, 0.5);
+  font-family: var(--font-mono);
+}
+
+/* Gaming Button Effects */
+.btn-gaming {
+  background: linear-gradient(135deg, var(--game-purple) 0%, var(--game-purple-light) 100%);
+  border: none;
+  box-shadow: 0 4px 15px hsl(260, 84%, 57%, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-gaming:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px hsl(260, 84%, 57%, 0.4);
+}
+
+.btn-gaming:active {
+  transform: translateY(0);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--game-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--game-purple);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--game-purple-light);
+}
+
+/* Loading Animations */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Form Focus Effects */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--game-purple) !important;
+  box-shadow: 0 0 0 2px hsl(260, 84%, 57%, 0.2) !important;
+}
+
+/* Gaming Theme Utilities */
+.bg-game-dark { background-color: var(--game-dark); }
+.bg-game-darker { background-color: var(--game-darker); }
+.bg-game-blue { background-color: var(--game-blue); }
+.bg-game-purple { background-color: var(--game-purple); }
+.bg-game-purple-light { background-color: var(--game-purple-light); }
+.bg-game-pink { background-color: var(--game-pink); }
+
+.text-game-purple { color: var(--game-purple); }
+.text-game-purple-light { color: var(--game-purple-light); }
+.text-game-pink { color: var(--game-pink); }
+
+.border-game-purple { border-color: var(--game-purple); }
+.border-game-purple-light { border-color: var(--game-purple-light); }
+
+/* Navigation Enhancements */
+.nav-link-active {
+  color: var(--game-purple) !important;
+  text-shadow: 0 0 10px hsl(260, 84%, 57%, 0.5);
+}
+
+/* Admin Panel Enhancements */
+.admin-stats-card {
+  background: linear-gradient(135deg, var(--game-blue) 0%, var(--game-darker) 100%);
+  border: 1px solid hsl(260, 84%, 57%, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--game-purple) 50%, transparent 100%);
+}
+
+/* Success States */
+.success-glow {
+  box-shadow: 0 0 20px hsl(120, 100%, 50%, 0.3);
+  border-color: hsl(120, 100%, 50%) !important;
+}
+
+/* Error States */
+.error-glow {
+  box-shadow: 0 0 20px hsl(0, 100%, 50%, 0.3);
+  border-color: hsl(0, 100%, 50%) !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .tournament-card {
+    margin-bottom: 1rem;
+  }
+  
+  .glow-effect {
+    box-shadow: none;
+  }
+  
+  .btn-gaming:hover {
+    transform: none;
+  }
+}
+
 /* Notification Pulse Animation */
 .notification-pulse {
   animation: pulse 2s infinite;

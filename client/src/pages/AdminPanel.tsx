@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,8 +46,12 @@ export default function AdminPanel() {
   // Fetch settings
   const { data: settings } = useQuery<Setting[]>({
     queryKey: ['/api/admin/settings'],
-    onSuccess: (data) => {
-      const settingsMap = data.reduce((acc, setting) => {
+  });
+
+  // Update local state when settings data changes
+  React.useEffect(() => {
+    if (settings) {
+      const settingsMap = settings.reduce((acc: Record<string, string>, setting: Setting) => {
         acc[setting.key] = setting.value;
         return acc;
       }, {} as Record<string, string>);
@@ -65,15 +69,12 @@ export default function AdminPanel() {
           Object.entries(settingsMap).filter(([key]) => key.startsWith('website_'))
         ),
       }));
-    },
-  });
+    }
+  }, [settings]);
 
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      return apiRequest('/api/admin/settings', {
-        method: 'POST',
-        body: JSON.stringify({ key, value }),
-      });
+      return apiRequest('POST', '/api/admin/settings', { key, value });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
@@ -105,7 +106,7 @@ export default function AdminPanel() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest('/api/auth/logout', { method: 'POST' });
+      await apiRequest('POST', '/api/auth/logout');
       queryClient.clear();
       setLocation('/login');
       toast({

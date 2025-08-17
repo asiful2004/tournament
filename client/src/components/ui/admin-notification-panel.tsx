@@ -20,7 +20,7 @@ export function AdminNotificationPanel() {
 
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      return apiRequest(`/api/admin/notifications/${notificationId}/read`, "POST");
+      return apiRequest("POST", `/api/admin/notifications/${notificationId}/read`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
@@ -36,7 +36,7 @@ export function AdminNotificationPanel() {
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/admin/notifications/mark-all-read", "POST");
+      return apiRequest("POST", "/api/admin/notifications/mark-all-read");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });

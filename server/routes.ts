@@ -76,8 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Must be 15 years or older to participate" });
       }
       
-      await storage.upsertUser({
-        id: userId,
+      await storage.updateUser(userId, {
         dateOfBirth: birthDate,
         isAgeVerified: true,
       });
@@ -490,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         template: "smtp_test",
         status: result.success ? "sent" : "failed",
         error: result.error || null,
-        sentAt: result.success ? new Date().toISOString() : null,
+        sentAt: result.success ? new Date() : null,
       });
 
       res.json({ 
@@ -499,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error testing SMTP:", error);
-      res.status(500).json({ message: "Failed to test SMTP", error: error.message });
+      res.status(500).json({ message: "Failed to test SMTP", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
