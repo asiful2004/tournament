@@ -44,6 +44,8 @@ export interface IStorage {
   createUser(user: Partial<UpsertUser>): Promise<User>;
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  deleteUser(id: string): Promise<void>;
   
   // Tournament operations
   getTournaments(): Promise<Tournament[]>;
@@ -51,6 +53,8 @@ export interface IStorage {
   createTournament(tournament: InsertTournament): Promise<Tournament>;
   updateTournament(id: string, tournament: Partial<InsertTournament>): Promise<Tournament>;
   getTournamentsByStatus(status: string): Promise<Tournament[]>;
+  getAllTournaments(): Promise<Tournament[]>;
+  deleteTournament(id: string): Promise<void>;
   
   // Payment operations
   getPayments(): Promise<Payment[]>;
@@ -66,6 +70,7 @@ export interface IStorage {
   getParticipantsByUser(userId: string): Promise<Participant[]>;
   createParticipant(participant: InsertParticipant): Promise<Participant>;
   updateParticipant(id: string, participant: Partial<InsertParticipant>): Promise<Participant>;
+  updateParticipantByUserAndTournament(userId: string, tournamentId: string, participant: Partial<InsertParticipant>): Promise<void>;
   
   // Website order operations
   getWebsiteOrders(): Promise<WebsiteOrder[]>;
@@ -141,6 +146,14 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   // Tournament operations
   async getTournaments(): Promise<Tournament[]> {
     return await db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
@@ -167,6 +180,14 @@ export class DatabaseStorage implements IStorage {
 
   async getTournamentsByStatus(status: string): Promise<Tournament[]> {
     return await db.select().from(tournaments).where(eq(tournaments.status, status as any));
+  }
+
+  async getAllTournaments(): Promise<Tournament[]> {
+    return await db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
+  }
+
+  async deleteTournament(id: string): Promise<void> {
+    await db.delete(tournaments).where(eq(tournaments.id, id));
   }
 
   // Payment operations
@@ -226,6 +247,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(participants.id, id))
       .returning();
     return updatedParticipant;
+  }
+
+  async updateParticipantByUserAndTournament(userId: string, tournamentId: string, participant: Partial<InsertParticipant>): Promise<void> {
+    await db
+      .update(participants)
+      .set(participant)
+      .where(and(eq(participants.userId, userId), eq(participants.tournamentId, tournamentId)));
   }
 
   // Website order operations

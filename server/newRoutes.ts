@@ -317,13 +317,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin panel routes
+  // Get all users (admin only)
   app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
     try {
-      // Implementation would go here - get all users
-      res.json({ message: 'Admin users endpoint' });
+      const users = await storage.getAllUsers();
+      res.json(users);
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  // Update user role (admin only)
+  app.patch('/api/admin/users/:id/role', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { role } = req.body;
+      const userId = req.params.id;
+      
+      if (!['user', 'admin', 'super_admin'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
+      }
+
+      await storage.updateUser(userId, { role });
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'user_role_updated', { userId, newRole: role });
+      }
+      
+      res.json({ message: 'User role updated successfully' });
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      res.status(500).json({ message: 'Failed to update user role' });
+    }
+  });
+
+  // Delete user (admin only)
+  app.delete('/api/admin/users/:id', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.params.id;
+      
+      if (req.user && req.user.id === userId) {
+        return res.status(400).json({ message: 'Cannot delete your own account' });
+      }
+
+      await storage.deleteUser(userId);
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'user_deleted', { deletedUserId: userId });
+      }
+      
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
+
+  // Get pending payments (admin only)
+  app.get('/api/admin/payments/pending', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const payments = await storage.getPaymentsByStatus('pending');
+      res.json(payments);
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+      res.status(500).json({ message: 'Failed to fetch pending payments' });
+    }
+  });
+
+  // Approve payment (admin only)
+  app.post('/api/admin/payments/:id/approve', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const paymentId = req.params.id;
+      const payment = await storage.getPayment(paymentId);
+      
+      if (!payment) {
+        return res.status(404).json({ message: 'Payment not found' });
+      }
+
+      await storage.updatePayment(paymentId, { status: 'approved', approvedAt: new Date() });
+      
+      // Update participant status if it's for a tournament
+      if (payment.tournamentId) {
+        await storage.updateParticipantByUserAndTournament(payment.userId, payment.tournamentId, { status: 'approved' });
+      }
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'payment_approved', { paymentId, userId: payment.userId });
+      }
+      
+      res.json({ message: 'Payment approved successfully' });
+    } catch (error) {
+      console.error('Error approving payment:', error);
+      res.status(500).json({ message: 'Failed to approve payment' });
+    }
+  });
+
+  // Reject payment (admin only)
+  app.post('/api/admin/payments/:id/reject', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const paymentId = req.params.id;
+      const { reason } = req.body;
+      const payment = await storage.getPayment(paymentId);
+      
+      if (!payment) {
+        return res.status(404).json({ message: 'Payment not found' });
+      }
+
+      await storage.updatePayment(paymentId, { 
+        status: 'rejected', 
+        rejectedAt: new Date(),
+        rejectionReason: reason 
+      });
+      
+      // Update participant status if it's for a tournament
+      if (payment.tournamentId) {
+        await storage.updateParticipantByUserAndTournament(payment.userId, payment.tournamentId, { status: 'rejected' });
+      }
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'payment_rejected', { paymentId, userId: payment.userId, reason });
+      }
+      
+      res.json({ message: 'Payment rejected successfully' });
+    } catch (error) {
+      console.error('Error rejecting payment:', error);
+      res.status(500).json({ message: 'Failed to reject payment' });
+    }
+  });
+
+  // Get all tournaments (admin only)
+  app.get('/api/admin/tournaments', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const tournaments = await storage.getAllTournaments();
+      res.json(tournaments);
+    } catch (error) {
+      console.error('Error fetching admin tournaments:', error);
+      res.status(500).json({ message: 'Failed to fetch tournaments' });
+    }
+  });
+
+  // Update tournament status (admin only)
+  app.patch('/api/admin/tournaments/:id/status', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { status } = req.body;
+      const tournamentId = req.params.id;
+      
+      if (!['draft', 'published', 'live', 'finished', 'cancelled'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+      }
+
+      await storage.updateTournament(tournamentId, { status });
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'tournament_status_updated', { tournamentId, newStatus: status });
+      }
+      
+      res.json({ message: 'Tournament status updated successfully' });
+    } catch (error) {
+      console.error('Error updating tournament status:', error);
+      res.status(500).json({ message: 'Failed to update tournament status' });
+    }
+  });
+
+  // Delete tournament (admin only)
+  app.delete('/api/admin/tournaments/:id', isAuthenticated, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const tournamentId = req.params.id;
+      
+      await storage.deleteTournament(tournamentId);
+      
+      if (req.user) {
+        await storage.createAuditLog(req.user.id, 'tournament_deleted', { tournamentId });
+      }
+      
+      res.json({ message: 'Tournament deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting tournament:', error);
+      res.status(500).json({ message: 'Failed to delete tournament' });
     }
   });
 

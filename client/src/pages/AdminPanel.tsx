@@ -7,9 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
+import { Trash2, Edit, Shield, Users, Trophy, CreditCard, CheckCircle, XCircle } from 'lucide-react';
 
 interface Setting {
   id: string;
@@ -170,6 +173,18 @@ export default function AdminPanel() {
               Payments
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="users" className="space-y-6">
+            <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="tournaments" className="space-y-6">
+            <TournamentManagement />
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            <PaymentManagement />
+          </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -348,5 +363,390 @@ export default function AdminPanel() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// User Management Component
+function UserManagement() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ['/api/admin/users'],
+  });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      return apiRequest('PATCH', `/api/admin/users/${userId}/role`, { role });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: 'Role Updated',
+        description: 'User role has been updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Update Failed',
+        description: error.message || 'Failed to update user role',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest('DELETE', `/api/admin/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: 'User Deleted',
+        description: 'User has been deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Delete Failed',
+        description: error.message || 'Failed to delete user',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  return (
+    <Card className="bg-gray-900/90 border-purple-500/20">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <Users className="h-5 w-5 mr-2" />
+          User Management
+        </CardTitle>
+        <CardDescription className="text-gray-400">
+          Manage user accounts and permissions
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400">Loading users...</div>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-8">
+            <Users className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">No Users Found</h3>
+            <p className="text-gray-400">No users are registered yet</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-purple-500/20">
+                  <th className="text-left text-gray-300 py-3">Name</th>
+                  <th className="text-left text-gray-300 py-3">Email</th>
+                  <th className="text-left text-gray-300 py-3">Role</th>
+                  <th className="text-left text-gray-300 py-3">Age Verified</th>
+                  <th className="text-left text-gray-300 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user: any) => (
+                  <tr key={user.id} className="border-b border-purple-500/10">
+                    <td className="py-3 text-white">{user.name}</td>
+                    <td className="py-3 text-gray-300">{user.email}</td>
+                    <td className="py-3">
+                      <Select
+                        value={user.role || 'user'}
+                        onValueChange={(role) => updateRoleMutation.mutate({ userId: user.id, role })}
+                      >
+                        <SelectTrigger className="w-32 bg-gray-800 border-gray-700">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="super_admin">Super Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="py-3">
+                      <Badge className={user.isAgeVerified ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
+                        {user.isAgeVerified ? 'Verified' : 'Pending'}
+                      </Badge>
+                    </td>
+                    <td className="py-3">
+                      <Button
+                        onClick={() => deleteUserMutation.mutate(user.id)}
+                        disabled={deleteUserMutation.isPending}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Tournament Management Component
+function TournamentManagement() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const { data: tournaments = [], isLoading } = useQuery({
+    queryKey: ['/api/admin/tournaments'],
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ tournamentId, status }: { tournamentId: string; status: string }) => {
+      return apiRequest('PATCH', `/api/admin/tournaments/${tournamentId}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tournaments'] });
+      toast({
+        title: 'Status Updated',
+        description: 'Tournament status has been updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Update Failed',
+        description: error.message || 'Failed to update tournament status',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteTournamentMutation = useMutation({
+    mutationFn: async (tournamentId: string) => {
+      return apiRequest('DELETE', `/api/admin/tournaments/${tournamentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/tournaments'] });
+      toast({
+        title: 'Tournament Deleted',
+        description: 'Tournament has been deleted successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Delete Failed',
+        description: error.message || 'Failed to delete tournament',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  return (
+    <Card className="bg-gray-900/90 border-purple-500/20">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <Trophy className="h-5 w-5 mr-2" />
+          Tournament Management
+        </CardTitle>
+        <CardDescription className="text-gray-400">
+          Manage tournament status and settings
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400">Loading tournaments...</div>
+          </div>
+        ) : tournaments.length === 0 ? (
+          <div className="text-center py-8">
+            <Trophy className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">No Tournaments Found</h3>
+            <p className="text-gray-400">No tournaments have been created yet</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-purple-500/20">
+                  <th className="text-left text-gray-300 py-3">Name</th>
+                  <th className="text-left text-gray-300 py-3">Game Mode</th>
+                  <th className="text-left text-gray-300 py-3">Entry Fee</th>
+                  <th className="text-left text-gray-300 py-3">Status</th>
+                  <th className="text-left text-gray-300 py-3">Start Time</th>
+                  <th className="text-left text-gray-300 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tournaments.map((tournament: any) => (
+                  <tr key={tournament.id} className="border-b border-purple-500/10">
+                    <td className="py-3 text-white">{tournament.name}</td>
+                    <td className="py-3 text-gray-300">{tournament.gameMode}</td>
+                    <td className="py-3 text-gray-300">৳{tournament.entryFee}</td>
+                    <td className="py-3">
+                      <Select
+                        value={tournament.status}
+                        onValueChange={(status) => updateStatusMutation.mutate({ tournamentId: tournament.id, status })}
+                      >
+                        <SelectTrigger className="w-32 bg-gray-800 border-gray-700">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="live">Live</SelectItem>
+                          <SelectItem value="finished">Finished</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="py-3 text-gray-300">
+                      {new Date(tournament.startTime).toLocaleString()}
+                    </td>
+                    <td className="py-3">
+                      <Button
+                        onClick={() => deleteTournamentMutation.mutate(tournament.id)}
+                        disabled={deleteTournamentMutation.isPending}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Payment Management Component
+function PaymentManagement() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ['/api/admin/payments/pending'],
+  });
+
+  const approvePaymentMutation = useMutation({
+    mutationFn: async (paymentId: string) => {
+      return apiRequest('POST', `/api/admin/payments/${paymentId}/approve`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments/pending'] });
+      toast({
+        title: 'Payment Approved',
+        description: 'Payment has been approved successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Approval Failed',
+        description: error.message || 'Failed to approve payment',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const rejectPaymentMutation = useMutation({
+    mutationFn: async ({ paymentId, reason }: { paymentId: string; reason: string }) => {
+      return apiRequest('POST', `/api/admin/payments/${paymentId}/reject`, { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments/pending'] });
+      toast({
+        title: 'Payment Rejected',
+        description: 'Payment has been rejected successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Rejection Failed',
+        description: error.message || 'Failed to reject payment',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  return (
+    <Card className="bg-gray-900/90 border-purple-500/20">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center">
+          <CreditCard className="h-5 w-5 mr-2" />
+          Payment Management
+        </CardTitle>
+        <CardDescription className="text-gray-400">
+          Approve or reject pending payments
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400">Loading payments...</div>
+          </div>
+        ) : payments.length === 0 ? (
+          <div className="text-center py-8">
+            <CreditCard className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">No Pending Payments</h3>
+            <p className="text-gray-400">All payments have been processed</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-purple-500/20">
+                  <th className="text-left text-gray-300 py-3">User</th>
+                  <th className="text-left text-gray-300 py-3">Method</th>
+                  <th className="text-left text-gray-300 py-3">Amount</th>
+                  <th className="text-left text-gray-300 py-3">TXN ID</th>
+                  <th className="text-left text-gray-300 py-3">Phone</th>
+                  <th className="text-left text-gray-300 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment: any) => (
+                  <tr key={payment.id} className="border-b border-purple-500/10">
+                    <td className="py-3 text-white">{payment.userId}</td>
+                    <td className="py-3">
+                      <Badge className={payment.method === 'bkash' ? 'bg-pink-500/20 text-pink-400' : 'bg-orange-500/20 text-orange-400'}>
+                        {payment.method}
+                      </Badge>
+                    </td>
+                    <td className="py-3 text-gray-300">৳{payment.amount}</td>
+                    <td className="py-3 text-gray-300">{payment.txnId}</td>
+                    <td className="py-3 text-gray-300">{payment.payerNumber}</td>
+                    <td className="py-3 flex gap-2">
+                      <Button
+                        onClick={() => approvePaymentMutation.mutate(payment.id)}
+                        disabled={approvePaymentMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700"
+                        size="sm"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => rejectPaymentMutation.mutate({ paymentId: payment.id, reason: 'Invalid transaction' })}
+                        disabled={rejectPaymentMutation.isPending}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
