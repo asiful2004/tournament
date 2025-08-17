@@ -3,8 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import Navigation from "@/components/ui/navigation";
 import Footer from "@/components/ui/footer";
 import { Trophy, Flame, Crown, Clock, TriangleAlert } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Landing() {
+  const [_, setLocation] = useLocation();
+
   return (
     <div className="min-h-screen bg-game-dark text-gray-100">
       <Navigation />
@@ -30,7 +33,7 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setLocation('/login')}
               className="bg-gradient-to-r from-game-purple to-game-purple-light px-8 py-4 rounded-xl font-semibold text-lg glow-effect hover:scale-105 transition-transform"
               data-testid="button-join-tournament"
             >

@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation, Link } from "wouter";
 import { 
   Flame, 
   Trophy, 
@@ -27,8 +28,12 @@ import {
 
 export default function Navigation() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [_, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // For now, assume user is not authenticated since we disabled the auth query
+  const actuallyAuthenticated = false;
 
   const navigationItems = [
     { href: "/tournaments", label: "Tournaments", icon: Trophy },
@@ -44,10 +49,10 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Brand */}
           <div className="flex items-center space-x-3">
-            <a href="/" className="flex items-center space-x-3" data-testid="brand-link">
+            <Link href="/" className="flex items-center space-x-3" data-testid="brand-link">
               <Flame className="text-game-purple text-2xl h-8 w-8" />
               <span className="text-xl font-bold text-white">FF Tournament Hub</span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -55,9 +60,9 @@ export default function Navigation() {
             <div className="hidden md:flex items-center space-x-8">
               <div className="flex space-x-6">
                 {navigationItems.map((item) => {
-                  if (item.requireAuth && !isAuthenticated) return null;
+                  if (item.requireAuth && !actuallyAuthenticated) return null;
                   return (
-                    <a
+                    <Link
                       key={item.href}
                       href={item.href}
                       className="text-gray-300 hover:text-game-purple transition-colors flex items-center"
@@ -65,18 +70,18 @@ export default function Navigation() {
                     >
                       <item.icon className="mr-1 h-4 w-4" />
                       {item.label}
-                    </a>
+                    </Link>
                   );
                 })}
-                {isAdmin && (
-                  <a
+                {actuallyAuthenticated && user?.role === 'admin' && (
+                  <Link
                     href="/admin"
                     className="text-gray-300 hover:text-game-purple transition-colors flex items-center"
                     data-testid="nav-link-admin"
                   >
                     <Shield className="mr-1 h-4 w-4" />
                     Admin
-                  </a>
+                  </Link>
                 )}
               </div>
             </div>
@@ -87,18 +92,18 @@ export default function Navigation() {
             <div className="hidden md:flex items-center space-x-4">
               {isLoading ? (
                 <div className="w-8 h-8 bg-game-purple/20 rounded-full animate-pulse"></div>
-              ) : isAuthenticated ? (
+              ) : actuallyAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2 hover:bg-game-purple/20" data-testid="user-menu-trigger">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user?.profileImageUrl || undefined} />
+                        <AvatarImage src={undefined} />
                         <AvatarFallback className="bg-game-purple text-white">
                           <User className="h-4 w-4" />
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-white">
-                        {user?.firstName || user?.email?.split('@')[0] || 'User'}
+                        {user?.name || user?.email?.split('@')[0] || 'User'}
                       </span>
                       {user?.isAgeVerified && (
                         <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
@@ -134,7 +139,7 @@ export default function Navigation() {
               ) : (
                 <div className="flex items-center space-x-4">
                   <Button 
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={() => setLocation('/register')}
                     className="bg-game-purple hover:bg-game-purple-light px-4 py-2 rounded-lg transition-colors glow-effect"
                     data-testid="button-register"
                   >
@@ -142,7 +147,7 @@ export default function Navigation() {
                     Register
                   </Button>
                   <Button 
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={() => setLocation('/login')}
                     variant="outline"
                     className="border border-game-purple text-game-purple hover:bg-game-purple hover:text-white px-4 py-2 rounded-lg transition-colors"
                     data-testid="button-login"
@@ -213,14 +218,14 @@ export default function Navigation() {
                     {/* User Info */}
                     <div className="px-3 py-2 flex items-center space-x-3">
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={user?.profileImageUrl || undefined} />
+                        <AvatarImage src={undefined} />
                         <AvatarFallback className="bg-game-purple text-white">
                           <User className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="text-white font-medium">
-                          {user?.firstName || user?.email?.split('@')[0] || 'User'}
+                          {user?.name || user?.email?.split('@')[0] || 'User'}
                         </div>
                         {user?.isAgeVerified && (
                           <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
@@ -255,7 +260,7 @@ export default function Navigation() {
                   <div className="space-y-2 px-3">
                     <Button 
                       onClick={() => {
-                        window.location.href = '/api/login';
+                        setLocation('/register');
                         setIsMobileMenuOpen(false);
                       }}
                       className="w-full bg-game-purple hover:bg-game-purple-light glow-effect"
@@ -266,7 +271,7 @@ export default function Navigation() {
                     </Button>
                     <Button 
                       onClick={() => {
-                        window.location.href = '/api/login';
+                        setLocation('/login');
                         setIsMobileMenuOpen(false);
                       }}
                       variant="outline"
