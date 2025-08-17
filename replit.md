@@ -38,11 +38,13 @@ Preferred communication style: Simple, everyday language.
   - `sessions`: Replit Auth session storage (mandatory)
 
 ### Authentication & Authorization
-- **Provider**: Replit OpenID Connect (OIDC) integration
-- **Session Management**: PostgreSQL-backed session store with 1-week TTL
-- **Age Verification**: Mandatory 15+ age verification with date validation
+- **Provider**: Email/Password authentication with JWT tokens
+- **Session Management**: JWT token-based authentication with httpOnly cookies
+- **Age Verification**: Mandatory 15+ age verification with date validation during registration
 - **Role System**: Three-tier permissions (user, admin, super_admin)
-- **Security**: CSRF protection, secure session cookies, input validation
+- **Security**: Bcrypt password hashing, secure JWT tokens, input validation
+- **Demo Admin**: admin@skillsmoney.com / Admin@123 (created automatically)
+- **Password Reset**: Token-based password reset via email
 
 ### Payment Processing
 - **Method**: Manual payment verification (no automated payment gateways)
